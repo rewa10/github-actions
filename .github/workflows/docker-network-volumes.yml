@@ -1,0 +1,19 @@
+name: Docker volume and Network
+on: [workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t my-app .
+
+      - name: Create file
+        run: docker run -v my-volume:/app/test-results --network host my-app sh -c "echo 'Hello, World!' > /app/test-results/file.txt"
+
+      - name: Display contents
+        run: docker run -v my-volume:/app/test-results --network host my-app cat /app/test-results/file.txt
