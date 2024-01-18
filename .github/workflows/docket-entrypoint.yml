@@ -1,0 +1,30 @@
+name: Docker Entrypoint
+on: [workflow_dispatch]
+
+jobs:
+  docker-job:
+    runs-on: ubuntu-latest
+    container:
+      image: node:20.3-alpine3.17      
+      env:
+        ENV: Production
+      ports:
+        - 80
+    steps:
+      - name: Create a file
+        run: echo 'Content to be displayed at entrypoint' > text.txt
+      - name: Log node version
+        uses: docker://node:18.16-alpine3.17
+        with:
+          args: -v
+      - name: Display file contents at entrypoint
+        uses: docker://node:18.16-alpine3.17
+        with:
+          entrypoint: cat
+          args: text.txt
+      - uses: actions/checkout@v3
+      - name: Run a bash script
+        uses: docker://node:18.16-alpine3.17
+        with:
+          entrypoint: ./script.sh
+          args: "Run bash script at entrypoint."
