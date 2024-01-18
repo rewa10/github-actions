@@ -1,30 +1,31 @@
-name: Docker Entrypoint
-on: [workflow_dispatch]
+name: Java CI with Maven to Manage Artifacts
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  docker-job:
+  build:
     runs-on: ubuntu-latest
-    container:
-      image: node:20.3-alpine3.17      
-      env:
-        ENV: Production
-      ports:
-        - 80
+
     steps:
-      - name: Create a file
-        run: echo 'Content to be displayed at entrypoint' > text.txt
-      - name: Log node version
-        uses: docker://node:18.16-alpine3.17
-        with:
-          args: -v
-      - name: Display file contents at entrypoint
-        uses: docker://node:18.16-alpine3.17
-        with:
-          entrypoint: cat
-          args: text.txt
-      - uses: actions/checkout@v3
-      - name: Run a bash script
-        uses: docker://node:18.16-alpine3.17
-        with:
-          entrypoint: ./script.sh
-          args: "Run bash script at entrypoint."
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Upload Artifact to GitHub
+      uses: actions/upload-artifact@v3
+      with:
+        name: MavenArtifacts
+        path: target/*.war
